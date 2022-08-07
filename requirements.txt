@@ -1,0 +1,3 @@
+# Requrements
+
+pygame
