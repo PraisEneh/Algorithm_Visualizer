@@ -6,9 +6,8 @@ pygame.init()
 clock = pygame.time.Clock()
 HEIGHT = 400
 WIDTH = 700
-FPS = 15
-base = 0
-lst_size = 10
+FPS = 25
+lst_size = 25
 rand_range = 50
 
 
@@ -49,13 +48,15 @@ class DrawDetails:
         self.draw_controls()
         self.draw_list()
 
-    def draw_controls(self):
+    def draw_controls(self, ascending=True):
         self.WIN.fill(self.WHITE)
         x = (self.width // 2) - (self.PADDING // 2)
         y = (self.PADDING_TOP // 2) - 50
         title = self.FONT_600.render("Controls:  ", 1, self.RED)
-        controls = self.FONT_400.render("B - Bubble Sort || S - Selection Sort || ", 1, self.BLACK)
-        controls2 = self.FONT_400.render("R - New Random List || T - Toggle Ascending/Descending Order", 1, self.BLACK)
+        controls = self.FONT_400.render("B - Bubble Sort || S - Stable Selection Sort || I - Insertion Sort"
+                                        "", 1, self.BLACK)
+        controls2 = self.FONT_400.render(f"R - New Random List || T - Toggle "
+                                         f"{'Descending' if ascending else 'Ascending'} Order", 1, self.BLACK)
         self.WIN.blit(title, (0, y - 20))
         self.WIN.blit(controls, (0, y + 20))
         self.WIN.blit(controls2, (0, y + 50))
@@ -92,16 +93,15 @@ class DrawDetails:
     def bubble_sort(self, ascending):
         lst = self.lst
         for i in range(len(lst)):
-            print('Bubble Sort i: ', i)
             for j in range(0, len(lst) - i - 1):
                 if lst[j] > lst[j + 1] and ascending:
                     lst[j], lst[j + 1] = lst[j + 1], lst[j]
-                    self.draw_controls()
+                    self.draw_controls(ascending)
                     self.draw_list({j: self.BLUE, j + 1: self.GREEN})
                     yield True
                 elif lst[j] < lst[j + 1] and not ascending:
                     lst[j], lst[j + 1] = lst[j + 1], lst[j]
-                    self.draw_controls()
+                    self.draw_controls(ascending)
                     self.draw_list({j: self.BLUE, j + 1: self.GREEN})
                     yield True
         self.draw_list()
@@ -110,71 +110,64 @@ class DrawDetails:
     def select_sort(self, ascending, base=0):
         lst = self.lst
         for i in range(len(lst)):
+            clock.tick(FPS)
+            i = base
             for j in range(i + 1, len(lst)):
-                i = base
-                index = j
+                clock.tick(FPS)
                 try:
-                    mini = min(lst[i + 1:]) if min(lst[i + 1:]) < lst[i] else lst[i]
+                    if ascending:
+                        target = min(lst[i + 1:]) if min(lst[i + 1:]) < lst[i] else lst[i]
+                    else:
+                        target = max(lst[i + 1:]) if max(lst[i + 1:]) > lst[i] else lst[i]
                 except ValueError:
                     break
-                self.draw_list({i: self.BLUE, index: self.GREEN})
-                if lst[index] == mini:
-                    save = lst[index]
-                    for k in reversed(range(i, index)):
+                self.draw_list({i: self.BLUE, j: self.GREEN})
+                if lst[j] == target:
+                    save = lst[j]
+                    time.sleep(0.2)
+                    self.draw_list({i: self.BLUE, j: self.RED})
+                    time.sleep(0.2)
+                    for k in reversed(range(i, j)):
+                        clock.tick(FPS)
                         lst[k + 1] = lst[k]
-                        self.draw_controls()
-                        self.draw_list({i: self.BLUE, index: self.GREEN, k + 1: self.RED})
+                        self.draw_controls(ascending)
+                        self.draw_list({i: self.BLUE, j: self.GREEN, k + 1: self.RED})
                     lst[i] = save
-                    self.draw_list({i: self.GREEN, index: self.BLUE})
+                    self.draw_list({i: self.GREEN, j: self.BLUE})
                     base += 1
-                    index += 1
+                    j += 1
                     break
-                elif lst[index] == mini:
-                    base += 1
+                elif lst[i] == target:
+                    i += 1
+                    self.draw_list({i: self.BLUE})
                     continue
-            if len(lst) - 1 == i or self.check_lst(lst):
+            self.draw_list()
+            if self.check_lst(lst):
                 break
             yield base
-            # INCREMENT BASE OUTSIDE OF FUNCTIONS BUT INSIDE MAIN SUB-LOOP
         self.draw_list()
         return self.lst
 
-    def ss_Search(self, lst, base):
-        if self.check_lst(lst):
-            return
-        searching = True
-        while searching:
-            clock.tick(FPS)
-            try:
-                mini = min(lst[base + 1:]) if min(lst[base + 1:]) < lst[base] else lst[base]
-            except ValueError:
-                break
-            for base in range(len(lst)):
-
-                for j in range(base + 1, len(lst)):
-                    clock.tick(FPS)  # maybe this will fix the issue of the search "animation" moving too fast
-                      # due to the way the loops are structured
-
-                    self.draw_list({base: self.BLUE, j: self.GREEN})
-                    if lst[j] == mini:
-                        searching = False
-                        yield base, j
-
-    def ss_Sort(self, lst, base, index):
-        if self.check_lst(lst) or lst[base] == lst[index]:
-            return
-        time.sleep(0.5)
-        self.draw_list({index: self.RED})
-        time.sleep(0.5)
-        sorting = True
-        save = lst[index]
-        for i in reversed(range(base, index)):
-            clock.tick(FPS)
-            lst[i + 1] = lst[i]
-            self.draw_controls()
-            self.draw_list({base: self.BLUE, i + 1: self.RED})
-        lst[base] = save
-        self.draw_list({base: self.GREEN, index: self.BLUE})
+    def insertion_sort(self, ascending):
+        lst = self.lst
+        while not self.check_lst(lst):
+            for i in range(len(lst)):
+                clock.tick(FPS)
+                self.draw_list({i: self.BLUE, i + 1: self.GREEN})
+                try:
+                    if lst[i + 1] < lst[i] and ascending:
+                        lst[i], lst[i + 1] = lst[i + 1], lst[i]
+                        self.draw_controls(ascending)
+                        self.draw_list({i: self.GREEN, i + 1: self.BLUE})
+                        yield True
+                    elif lst[i + 1] > lst[i] and not ascending:
+                        lst[i], lst[i + 1] = lst[i + 1], lst[i]
+                        self.draw_controls(ascending)
+                        self.draw_list({i: self.GREEN, i + 1: self.BLUE})
+                        yield True
+                except IndexError:
+                    print('NException')
+        self.draw_list()
 
 
 def check_sort_state(d, sort_states, ascending, b):
@@ -196,6 +189,14 @@ def check_sort_state(d, sort_states, ascending, b):
             sort_states['sorting'] = False
             sort_states['select_sort'] = False
 
+    if sort_states["sorting"] and sort_states["insertion_sort"]:
+        try:
+            next(d.insertion_sort(ascending))
+        except StopIteration:
+            print('Exception')
+            sort_states['sorting'] = False
+            sort_states['insertion_sort'] = False
+
 
 def generate_list(size, rand_range):
     lst = [random.randrange(1, rand_range) for i in range(size)]
@@ -203,15 +204,17 @@ def generate_list(size, rand_range):
 
 
 def main():
+    base = 0
     run = True
     ascending = True
     sort_states = {
         'sorting': False,
         'bubble_sort': False,
         'select_sort': False,
+        'insertion_sort': False,
     }
-    # lst = generate_list(lst_size, rand_range)
-    lst = [9, 27, 44, 1, 7, 6, 1, 36, 24, 7]
+    lst = generate_list(lst_size, rand_range)
+    # lst = [9, 27, 44, 1, 7, 6, 1, 36, 24, 7]
     d = DrawDetails(lst, WIDTH, HEIGHT)
     while run:
         clock.tick(FPS)
@@ -228,25 +231,37 @@ def main():
             if event.key == pygame.K_b:
                 sort_states["bubble_sort"] = True
                 sort_states["select_sort"] = False
+                sort_states["insertion_sort"] = False
                 sort_states["sorting"] = True
                 d.bubble_sort(ascending)
 
             if event.key == pygame.K_s:
                 sort_states["select_sort"] = True
                 sort_states["bubble_sort"] = False
+                sort_states["insertion_sort"] = False
                 sort_states["sorting"] = True
                 base = 0
                 d.select_sort(ascending)
 
+            if event.key == pygame.K_i:
+                sort_states["insertion_sort"] = True
+                sort_states["select_sort"] = False
+                sort_states["bubble_sort"] = False
+                sort_states["sorting"] = True
+                d.insertion_sort(ascending)
+
             if event.key == pygame.K_r:
-                d.draw_controls()
+                d.draw_controls(ascending)
                 d.new_ran_list(rand_range)
                 sort_states["sorting"] = False
             if event.key == pygame.K_t:
                 if ascending:
                     ascending = False
+                    base = 0
                 else:
                     ascending = True
+                    base = 0
+                d.draw_controls(ascending)
 
     pygame.quit()
 
