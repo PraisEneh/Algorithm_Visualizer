@@ -24,14 +24,16 @@ def main():
     while run:
         clock.tick(50)
         for event in pygame.event.get():
+            keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                column = pos[0] // (WIDTH + MARGIN)
-                row = pos[1] // (HEIGHT + MARGIN)
-                grid[row][column] = 1
-                print("Click ", pos, "Grid coordinates: ", row, column)
+                if keys[pygame.K_s]:
+                    pos = pygame.mouse.get_pos()
+                    column = pos[0] // (WIDTH + MARGIN)
+                    row = pos[1] // (HEIGHT + MARGIN)
+                    grid[row][column] = 1
+                    print("Click ", pos, "Grid coordinates: ", row, column)
         scr.fill(black)
         for row in range(NUM_ROW):
             for column in range(NUM_COL):

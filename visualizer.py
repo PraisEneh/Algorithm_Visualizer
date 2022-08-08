@@ -166,7 +166,7 @@ class DrawDetails:
                         self.draw_list({i: self.GREEN, i + 1: self.BLUE})
                         yield True
                 except IndexError:
-                    print('NException')
+                    print('Done')
         self.draw_list()
 
 
@@ -176,7 +176,7 @@ def check_sort_state(d, sort_states, ascending, b):
             next(d.bubble_sort(ascending))
 
         except StopIteration:
-            print("Exception")
+            print("Done")
             sort_states["sorting"] = False
             sort_states["bubble_sort"] = False
 
@@ -185,7 +185,7 @@ def check_sort_state(d, sort_states, ascending, b):
             base = next(d.select_sort(ascending, b))
             return base
         except StopIteration:
-            print('Exception')
+            print('Done')
             sort_states['sorting'] = False
             sort_states['select_sort'] = False
 
@@ -193,7 +193,7 @@ def check_sort_state(d, sort_states, ascending, b):
         try:
             next(d.insertion_sort(ascending))
         except StopIteration:
-            print('Exception')
+            print('Done')
             sort_states['sorting'] = False
             sort_states['insertion_sort'] = False
 
