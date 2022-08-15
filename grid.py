@@ -25,8 +25,14 @@ end_pos = ()
 GRID[0][0] = 1
 window_size = [380, 400]
 WIN = pygame.display.set_mode(window_size)
-pygame.display.set_caption("Grid")
+pygame.display.set_caption("Grid Search Visual")
 clock = pygame.time.Clock()
+searching = False
+modes = {
+    1: False,
+    2: False,
+    3: False
+}
 
 
 def update_grid():
