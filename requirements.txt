@@ -1,3 +1,4 @@
 # Requrements
 
 pygame
+numpy
