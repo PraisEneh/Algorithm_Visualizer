@@ -8,6 +8,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+LIGHT_BLUE = (0, 192, 255)
 GREY = (192, 192, 192)
 FONT_400 = pygame.font.SysFont('Calibri', 18)
 FONT_600 = pygame.font.SysFont('Calibri', 32)
@@ -44,6 +45,8 @@ def update_grid(curr_mode=None):
                 color = GREEN
             if GRID[row][column] == 3:
                 color = BLUE
+            if GRID[row][column] == 4:
+                color = LIGHT_BLUE
             pygame.draw.rect(WIN,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
@@ -61,10 +64,10 @@ def draw_controls(mode=None):
     h = window_size[1] - y
     ctrl_box = (x, y, w, h)
     title = FONT_600.render("Controls:  ", 1, RED)
-    controls = FONT_400.render("S + Click - Starting Point || E + Click - Ending Point", 1, BLACK)
+    controls = FONT_400.render("S + Click - Starting Point || E + Click - Ending Point ||", 1, BLACK)
     controls2 = FONT_400.render("R - Reset Grid", 1, BLACK)
     controls3 = FONT_400.render("1 - Shortest Path || 2 - A Star", 1, BLACK)
-    controls4 = FONT_400.render(f"Spacebar - Begin                            Mode: {mode}", 1, BLACK)
+    controls4 = FONT_400.render(f"Spacebar - Begin                            Mode: {mode if mode else 'None'}", 1, BLACK)
     pygame.draw.rect(WIN, GREY, ctrl_box)
     WIN.blit(title, (0, y))
     WIN.blit(controls, (0, y + 40))
@@ -80,7 +83,7 @@ def get_distance(pointA, pointB):
     column = pointA[0] // (WIDTH + MARGIN)
     row = pointA[1] // (HEIGHT + MARGIN)
     GRID[row][column] = 3
-    print('Coloring Grid ', row, ' ', column)
+    print('Coloring Grid ', column, ' ', row)
     return abs(pointA[0] - pointB[0]) + abs(pointA[1] - pointB[1])
 
 
@@ -101,32 +104,31 @@ def a_star(current, end):
     if isGoal(current, end):
         print("YESS")
         return True
-    top = (current[0], current[1] - HEIGHT)
-    bottom = (current[0], current[1] + HEIGHT)
-    left = (current[0] - WIDTH, current[1])
-    right = (current[0] + WIDTH, current[1])
+    top = (current[0], current[1] - (HEIGHT+MARGIN))
+    bottom = (current[0], current[1] + (HEIGHT+MARGIN))
+    left = (current[0] - (WIDTH+MARGIN), current[1])
+    right = (current[0] + (WIDTH+MARGIN), current[1])
     directions = [right, left, bottom, top]
 
-    distances.append(get_distance(right, end))
-    update_grid(mode)
-    time.sleep(0.2)
-    distances.append(get_distance(left, end))
-    update_grid(mode)
-    time.sleep(0.2)
-    distances.append(get_distance(bottom, end))
-    update_grid(mode)
-    time.sleep(0.2)
-    distances.append(get_distance(top, end))
-    update_grid(mode)
-    time.sleep(0.2)
+    for i in directions:
+        if i[0] < 0 or i[1] < 0 or i[0] > ((MARGIN + WIDTH) * NUM_COL + MARGIN) or i[1] > ((MARGIN + HEIGHT) * NUM_ROW + MARGIN):
+            continue
+        distances.append(get_distance(i, end))
+        update_grid(mode)
+        time.sleep(0.2)
+
     new_curr_pos = distances.index(min(distances))
     new_curr_pos = directions[new_curr_pos]
     new_column = new_curr_pos[0] // (WIDTH + MARGIN)
     new_row = new_curr_pos[1] // (HEIGHT + MARGIN)
+
     for row in range(NUM_ROW):
         for column in range(NUM_COL):
             if GRID[row][column] == 3:
                 GRID[row][column] = 0
+    GRID[new_row][new_column] = 4
+    update_grid(mode)
+    time.sleep(0.2)
     GRID[new_row][new_column] = 1
     return new_curr_pos
 
@@ -136,8 +138,9 @@ def main():
     run = True
     searching = False
     curr_mode = ''
+    visited = []
     while run:
-        clock.tick(50)
+        clock.tick(60)
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
@@ -155,7 +158,7 @@ def main():
                         GRID[row][column] = 1
                         current_pos = pos
                         #                                          Y    X
-                        print("Click ", pos, "Grid coordinates: ", row, column)
+                        print("Click ", pos, "Grid coordinates: ", column, row)
                     except IndexError:
                         continue
                 if keys[pygame.K_e]:
@@ -169,15 +172,14 @@ def main():
                                     GRID[i][j] = 0
                         GRID[row][column] = 2
                         end_pos = pos
-                        print("Click ", pos, "Grid coordinates: ", row, column)
+                        print("Click ", pos, "Grid coordinates: ", column, row)
                     except IndexError:
                         continue
-
             if keys[pygame.K_SPACE] and not searching:
                 searching = True
-                pygame.K_SPACE = False
-            elif keys[pygame.K_SPACE] and searching:
-                searching = False
+                # pygame.K_SPACE = False
+            # elif keys[pygame.K_SPACE] and searching:
+            #     searching = False
 
             if keys[pygame.K_1]:
                 modes[1] = True
@@ -190,17 +192,22 @@ def main():
 
             try:
                 if searching and modes[2] and current_pos and end_pos:
+                    visited.append(current_pos)
                     current_pos = a_star(current_pos, end_pos)
             except UnboundLocalError:
                 print('Please choose a starting and ending position')
             except TypeError:
+                print('Type Error')
                 searching = False
 
+            for i in visited:
+                column = i[0] // (WIDTH + MARGIN)
+                row = i[1] // (HEIGHT + MARGIN)
+                GRID[row][column] = 1
 
             if keys[pygame.K_r]:
                 GRID.fill(0)
         update_grid(curr_mode)
-        draw_controls(curr_mode)
     pygame.quit()
 
 
