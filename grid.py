@@ -1,6 +1,8 @@
 import pygame
-import time
+import time, platform
 import numpy as np
+
+print(platform.system())
 
 pygame.init()
 BLACK = (0, 0, 0)
@@ -20,10 +22,6 @@ NUM_COL = 15
 NUM_ROW = 10
 GRID = []
 GRID = np.zeros((NUM_ROW, NUM_COL))
-# for i in range(NUM_ROW):
-#     GRID.append([])
-#     for j in range(NUM_COL):
-#         GRID[i].append(0)
 window_size = [380, 400]
 WIN = pygame.display.set_mode(window_size)
 pygame.display.set_caption("Grid Search Visual")
@@ -64,17 +62,19 @@ def draw_controls(mode=None):
     h = window_size[1] - y
     ctrl_box = (x, y, w, h)
     title = FONT_600.render("Controls:  ", 1, RED)
-    controls = FONT_400.render("S + Click - Starting Point || E + Click - Ending Point ||", 1, BLACK)
-    controls2 = FONT_400.render("R - Reset Grid", 1, BLACK)
-    controls3 = FONT_400.render("1 - Shortest Path || 2 - A Star", 1, BLACK)
-    controls4 = FONT_400.render(f"Spacebar - Begin                            Mode: {mode if mode else 'None'}", 1,
+    controls = FONT_400.render("S + Click - Starting Point", 1, BLACK)
+    controls2 = FONT_400.render("E + Click - Ending Point", 1, BLACK)
+    controls3 = FONT_400.render("R - Reset Grid", 1, BLACK)
+    controls4 = FONT_400.render("1 - Shortest Path || 2 - A Star", 1, BLACK)
+    controls5 = FONT_400.render(f"Spacebar - Begin            Mode: {mode if mode else 'None'}", 1,
                                 BLACK)
     pygame.draw.rect(WIN, GREY, ctrl_box)
     WIN.blit(title, (0, y))
-    WIN.blit(controls, (0, y + 40))
-    WIN.blit(controls2, (0, y + 60))
-    WIN.blit(controls3, (0, y + 90))
-    WIN.blit(controls4, (0, y + 110))
+    WIN.blit(controls, (0, y + 30))
+    WIN.blit(controls2, (0, y + 50))
+    WIN.blit(controls3, (0, y + 70))
+    WIN.blit(controls4, (0, y + 100))
+    WIN.blit(controls5, (0, y + 120))
     pygame.display.flip()
 
 def draw_message():
