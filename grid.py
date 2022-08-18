@@ -77,6 +77,8 @@ def draw_controls(mode=None):
     WIN.blit(controls5, (0, y + 120))
     pygame.display.flip()
 
+
+# Draws a warning message when trying to start program w/o inputs
 def draw_message():
     x = window_size[0] // 14
     y = window_size[1] // 4
@@ -85,9 +87,10 @@ def draw_message():
     box = (x, y, w, h)
     words = FONT_400.render('Please Choose a Starting and Ending Position', 1, BLACK)
     pygame.draw.rect(WIN, YELLOW, box)
-    WIN.blit(words, (x+10, y))
+    WIN.blit(words, (x + 10, y))
     pygame.display.flip()
     time.sleep(3)
+
 
 def get_distance(pointA, pointB):
     # Using Manhattan Distance for "H"
@@ -99,6 +102,7 @@ def get_distance(pointA, pointB):
     return abs(pointA[0] - pointB[0]) + abs(pointA[1] - pointB[1])
 
 
+# Need a state checker to see if goal is reached
 def isGoal(pos, goal):
     column = pos[0] // (WIDTH + MARGIN)
     row = pos[1] // (HEIGHT + MARGIN)
@@ -146,6 +150,8 @@ def a_star(current, end):
     return new_curr_pos
 
 
+# Abstracted the ending sequence. These actions are always taken when
+# resetting or ending the search
 def end_sequence(visited, reset=False):
     if reset == True:
         visited.clear()
@@ -155,6 +161,7 @@ def end_sequence(visited, reset=False):
     return 'None', False
 
 
+# Main Loop
 def main():
     run = True
     searching = False
@@ -199,7 +206,6 @@ def main():
                     except IndexError:
                         continue
             if keys[pygame.K_r]:
-
                 update_grid(end_sequence(visited, True))
 
             if keys[pygame.K_SPACE] and not searching:
