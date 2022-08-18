@@ -9,4 +9,4 @@ Download files then run "pip install -r requirements.txt" and then run "visualiz
 Then, follow the onscreen commands.
 
 Alternatively, if you run "grid.py" you can visualize grid search.
-At the moment, only A Star search is working (in Alpha Stage)
+At the moment, only A Star search is working with a few minor bugs
